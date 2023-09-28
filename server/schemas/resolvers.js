@@ -13,8 +13,8 @@ const resolvers = {
       const params = username ? { username } : {};
       return Book.find(params).sort({ createdAt: -1 });
     },
-    book: async (parent, { thoughtId }) => {
-      return Book.findOne({ _id: thoughtId });
+    book: async (parent, { bookId }) => {
+      return Book.findOne({ _id: bookId });
     },
     me: async (parent, args, context) => {
       if (context.user) {
@@ -43,80 +43,37 @@ const resolvers = {
       if (!correctPw) {
         throw AuthenticationError;
       }
-
       const token = signToken(user);
-
       return { token, user };
     },
-//     saveBook: async (parent, { thoughtText }, context) => {
-//       if (context.user) {
-//         const book = await Book.create({
-//           thoughtText,
-//           thoughtAuthor: context.user.username,
-//         });
 
-//         await User.findOneAndUpdate(
-//           { _id: context.user._id },
-//           { $addToSet: { thoughts: thought._id } }
-//         );
+    saveBook: async (parent, { author, title, description, image, link }, context) => {
+      if (context.user) {
+         const user = await User.findOneAndUpdate(
+          { _id: context.user._id },
+          { $push: { savedBooks: {author, title, description, image, link} } }
+        );
 
-//         return thought;
-//       }
-//       throw AuthenticationError;
-//       ('You need to be logged in!');
-//     },
-//     addComment: async (parent, { thoughtId, commentText }, context) => {
-//       if (context.user) {
-//         return Thought.findOneAndUpdate(
-//           { _id: thoughtId },
-//           {
-//             $addToSet: {
-//               comments: { commentText, commentAuthor: context.user.username },
-//             },
-//           },
-//           {
-//             new: true,
-//             runValidators: true,
-//           }
-//         );
-//       }
-//       throw AuthenticationError;
-//     },
-//     removeThought: async (parent, { thoughtId }, context) => {
-//       if (context.user) {
-//         const thought = await Thought.findOneAndDelete({
-//           _id: thoughtId,
-//           thoughtAuthor: context.user.username,
-//         });
+        return user;
+      }
+      throw AuthenticationError;
+    },
+    
+    removeBook: async (parent, { BookId }, context) => {
+      if (context.user) {
+       
+        const user = await User.findOneAndUpdate(
+          { _id: context.user._id },
+          { $pull: { savedBooks: { BookId } } }
+        );
 
-//         await User.findOneAndUpdate(
-//           { _id: context.user._id },
-//           { $pull: { thoughts: thought._id } }
-//         );
-
-//         return thought;
-//       }
-//       throw AuthenticationError;
-//     },
-//     removeComment: async (parent, { thoughtId, commentId }, context) => {
-//       if (context.user) {
-//         return Thought.findOneAndUpdate(
-//           { _id: thoughtId },
-//           {
-//             $pull: {
-//               comments: {
-//                 _id: commentId,
-//                 commentAuthor: context.user.username,
-//               },
-//             },
-//           },
-//           { new: true }
-//         );
-//       }
-//       throw AuthenticationError;
-//     },
-//   },
-// };
+        return user;
+      }
+      throw AuthenticationError;
+    },
+    
+  },
+};
 
 
 
