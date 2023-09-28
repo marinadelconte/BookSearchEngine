@@ -3,34 +3,121 @@ const { signToken, AuthenticationError } = require('../utils/auth');
 
 const resolvers = {
   Query: {
-    matchups: async () => {
-      return await Matchup.find({});
+    users: async () => {
+      return User.find().populate('books');
     },
-    matchup: async (parent, { id }) => {
-      return await Matchup.findOne({_id: id});
+    user: async (parent, { username }) => {
+      return User.findOne({ username }).populate('books');
     },
-    tech: async () => {
-      // const params = username ? { username } : {};
-      return await Tech.find({});
+    books: async (parent, { username }) => {
+      const params = username ? { username } : {};
+      return Book.find(params).sort({ createdAt: -1 });
+    },
+    book: async (parent, { thoughtId }) => {
+      return Book.findOne({ _id: thoughtId });
+    },
+    me: async (parent, args, context) => {
+      if (context.user) {
+        return User.findOne({ _id: context.user._id }).populate('books');
+      }
+      throw AuthenticationError;
     },
   },
+
 
   Mutation: {
-    createMatchup: async (parent, { tech1, tech2 }) => {
-      const matchup = await Matchup.create({tech1, tech2});
-      return matchup;
+    addUser: async (parent, { username, email, password }) => {
+      const user = await User.create({ username, email, password });
+      const token = signToken(user);
+      return { token, user };
     },
-    createVote: async (parent, { techNum, matchupId}) => {
-      const matchup = await Matchup.findOneAndUpdate(
-        { _id: matchupId},
-        { $inc: { [`tech${techNum}_votes`]: 1 } },
-        { new: true }
-      );
-      return matchup
-    },
-  },
-};
+    login: async (parent, { email, password }) => {
+      const user = await User.findOne({ email });
 
-//w
+      if (!user) {
+        throw AuthenticationError;
+      }
+
+      const correctPw = await user.isCorrectPassword(password);
+
+      if (!correctPw) {
+        throw AuthenticationError;
+      }
+
+      const token = signToken(user);
+
+      return { token, user };
+    },
+//     saveBook: async (parent, { thoughtText }, context) => {
+//       if (context.user) {
+//         const book = await Book.create({
+//           thoughtText,
+//           thoughtAuthor: context.user.username,
+//         });
+
+//         await User.findOneAndUpdate(
+//           { _id: context.user._id },
+//           { $addToSet: { thoughts: thought._id } }
+//         );
+
+//         return thought;
+//       }
+//       throw AuthenticationError;
+//       ('You need to be logged in!');
+//     },
+//     addComment: async (parent, { thoughtId, commentText }, context) => {
+//       if (context.user) {
+//         return Thought.findOneAndUpdate(
+//           { _id: thoughtId },
+//           {
+//             $addToSet: {
+//               comments: { commentText, commentAuthor: context.user.username },
+//             },
+//           },
+//           {
+//             new: true,
+//             runValidators: true,
+//           }
+//         );
+//       }
+//       throw AuthenticationError;
+//     },
+//     removeThought: async (parent, { thoughtId }, context) => {
+//       if (context.user) {
+//         const thought = await Thought.findOneAndDelete({
+//           _id: thoughtId,
+//           thoughtAuthor: context.user.username,
+//         });
+
+//         await User.findOneAndUpdate(
+//           { _id: context.user._id },
+//           { $pull: { thoughts: thought._id } }
+//         );
+
+//         return thought;
+//       }
+//       throw AuthenticationError;
+//     },
+//     removeComment: async (parent, { thoughtId, commentId }, context) => {
+//       if (context.user) {
+//         return Thought.findOneAndUpdate(
+//           { _id: thoughtId },
+//           {
+//             $pull: {
+//               comments: {
+//                 _id: commentId,
+//                 commentAuthor: context.user.username,
+//               },
+//             },
+//           },
+//           { new: true }
+//         );
+//       }
+//       throw AuthenticationError;
+//     },
+//   },
+// };
+
+
 
 module.exports = resolvers
