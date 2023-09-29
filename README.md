@@ -7,9 +7,10 @@ This application can be accessed at the link below. Upon entering the site, you 
 
 
 ## Usage
-Here is an image of the application in use:
+Here is an image of the application in use: ![image](https://github.com/marinadelconte/BookSearchEngine/assets/137957098/1de1276f-309a-4ee6-ab69-38376b05a7d1)
 
-Here is a link to the deployed application:
+
+Here is a link to the deployed application: https://limitless-taiga-59709-c8b8e6dbc195.herokuapp.com/  
 
 
 ## Credits
