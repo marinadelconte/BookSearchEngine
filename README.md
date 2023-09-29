@@ -1,5 +1,5 @@
 ## Description
-The Book Search Engine is an application that was created using React. My task was to take starter code 
+The Book Search Engine is an application that was created using React, MERN stack, node.js/express.js and graphql. My task was to take starter code for a fully functioning Google Books API search engine built with a RESTful API, and refactor it to be a GraphQL API built with Apollo Server. 
 
 
 ## Installation
