@@ -7,7 +7,7 @@ const resolvers = {
       return User.find().populate('books');
     },
     user: async (parent, { username }) => {
-      return User.findOne({ username }).populate('books');
+      return User.findOne({ username }).populate('savedBooks');
     },
     books: async (parent, { username }) => {
       const params = username ? { username } : {};
@@ -18,7 +18,7 @@ const resolvers = {
     },
     me: async (parent, args, context) => {
       if (context.user) {
-        return User.findOne({ _id: context.user._id }).populate('books');
+        return User.findOne({ _id: context.user._id }).populate('savedBooks');
       }
       throw AuthenticationError;
     },
